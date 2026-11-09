@@ -1,0 +1,17 @@
+# ECS 上通过 SPRING_PROFILES_ACTIVE=cloud 启用。
+# 数据库与首批内容由部署步骤显式准备，应用启动时不执行学习样例 SQL。
+spring:
+  sql:
+    init:
+      mode: never
+  datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX:5}
+      minimum-idle: 0
+      connection-timeout: 5000
+
+server:
+  # Nginx 与 Java 位于同一台 ECS，通过本机地址转发。
+  address: 127.0.0.1
+  port: ${BACKEND_PORT:8080}
+  forward-headers-strategy: framework

@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: dongxiang-culture
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  sql:
+    init:
+      mode: always
+      encoding: UTF-8
+      schema-locations: classpath:db/init/schema.sql
+      data-locations: classpath:db/init/data.sql
+  mvc:
+    problemdetails:
+      enabled: true
+
+server:
+  address: 127.0.0.1
+  port: ${BACKEND_PORT:8080}
+  error:
+    include-stacktrace: never
+    include-message: never

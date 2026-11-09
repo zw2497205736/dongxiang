@@ -1,0 +1,282 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "东乡文化平台：当前连接与云端架构规划",
+    "locale": "zh-CN",
+    "output": ".archify/architecture-system-overview-20261109-230403/system-overview.html",
+    "quality_profile": "showcase"
+  },
+  "components": [
+    {
+      "id": "local_reader",
+      "type": "frontend",
+      "label": "浏览器中的 React",
+      "sublabel": "页面运行在浏览器",
+      "pos": [
+        40,
+        48
+      ],
+      "size": [
+        180,
+        80
+      ],
+      "tag": "已实现"
+    },
+    {
+      "id": "local_vite",
+      "type": "backend",
+      "label": "Vite 开发服务",
+      "sublabel": "本机 127.0.0.1:5173",
+      "pos": [
+        340,
+        48
+      ],
+      "size": [
+        180,
+        80
+      ],
+      "tag": "已实现"
+    },
+    {
+      "id": "local_java",
+      "type": "backend",
+      "label": "Spring Boot 后端",
+      "sublabel": "本机 127.0.0.1:8080",
+      "pos": [
+        670,
+        48
+      ],
+      "size": [
+        220,
+        80
+      ],
+      "tag": "已实现"
+    },
+    {
+      "id": "local_mysql",
+      "type": "database",
+      "label": "本地 MySQL",
+      "sublabel": "本机 127.0.0.1:3307",
+      "pos": [
+        985,
+        48
+      ],
+      "size": [
+        190,
+        80
+      ],
+      "tag": "已实现"
+    },
+    {
+      "id": "cloud_reader",
+      "type": "frontend",
+      "label": "微信或手机浏览器",
+      "sublabel": "访问域名并运行 React",
+      "pos": [
+        40,
+        340
+      ],
+      "size": [
+        180,
+        80
+      ],
+      "tag": "规划"
+    },
+    {
+      "id": "cloud_nginx",
+      "type": "security",
+      "label": "Nginx 公网入口",
+      "sublabel": "HTTPS 终止与接口转发",
+      "pos": [
+        340,
+        340
+      ],
+      "size": [
+        180,
+        80
+      ],
+      "tag": "规划"
+    },
+    {
+      "id": "cloud_java",
+      "type": "backend",
+      "label": "Spring Boot 单体",
+      "sublabel": "业务模块与数据库连接池",
+      "pos": [
+        670,
+        340
+      ],
+      "size": [
+        220,
+        80
+      ],
+      "tag": "规划"
+    },
+    {
+      "id": "cloud_rds",
+      "type": "database",
+      "label": "阿里云 RDS MySQL",
+      "sublabel": "独立托管的业务数据库",
+      "pos": [
+        985,
+        340
+      ],
+      "size": [
+        190,
+        80
+      ],
+      "tag": "规划"
+    },
+    {
+      "id": "cloud_static",
+      "type": "frontend",
+      "label": "React 构建文件",
+      "sublabel": "dist：HTML / JS / CSS",
+      "pos": [
+        340,
+        590
+      ],
+      "size": [
+        180,
+        80
+      ],
+      "tag": "规划"
+    },
+    {
+      "id": "future_oss",
+      "type": "cloud",
+      "label": "对象存储 OSS",
+      "sublabel": "图片与音频；后续接入",
+      "pos": [
+        670,
+        830
+      ],
+      "size": [
+        220,
+        80
+      ],
+      "tag": "后续可选"
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "当前：本机开发环境；已实现并做过本地验证",
+      "wraps": [
+        "local_reader",
+        "local_vite",
+        "local_java",
+        "local_mysql"
+      ],
+      "pad": 20
+    },
+    {
+      "kind": "region",
+      "label": "规划：同地域 VPC；云资源尚未创建",
+      "wraps": [
+        "cloud_nginx",
+        "cloud_java",
+        "cloud_rds",
+        "cloud_static"
+      ],
+      "pad": 24
+    },
+    {
+      "kind": "security-group",
+      "label": "规划：ECS 应用服务器与其安全组",
+      "wraps": [
+        "cloud_nginx",
+        "cloud_java",
+        "cloud_static"
+      ],
+      "pad": 12
+    }
+  ],
+  "connections": [
+    {
+      "from": "local_reader",
+      "to": "local_vite",
+      "label": "HTTP :5173",
+      "variant": "emphasis"
+    },
+    {
+      "from": "local_vite",
+      "to": "local_java",
+      "label": "/api → :8080",
+      "variant": "emphasis"
+    },
+    {
+      "from": "local_java",
+      "to": "local_mysql",
+      "label": "JDBC :3307"
+    },
+    {
+      "from": "cloud_reader",
+      "to": "cloud_nginx",
+      "label": "HTTPS :443",
+      "variant": "security"
+    },
+    {
+      "from": "cloud_nginx",
+      "to": "cloud_java",
+      "label": "/api → :8080",
+      "variant": "emphasis"
+    },
+    {
+      "from": "cloud_java",
+      "to": "cloud_rds",
+      "label": "JDBC 内网"
+    },
+    {
+      "from": "cloud_nginx",
+      "to": "cloud_static",
+      "label": "读取静态文件"
+    },
+    {
+      "from": "cloud_java",
+      "to": "future_oss",
+      "label": "SDK（后续）"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "当前与规划如何区分",
+      "items": [
+        "上方来自现有工作区配置核对；当前只有文章查询业务。",
+        "下方是尚未部署的独立 RDS 方案，采购与预算仍待确定。",
+        "工作区尚无 Git 提交快照，图中不提供提交级源码引用。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "连接与数据归属",
+      "items": [
+        "浏览器通过 HTTP / JSON 调用后端，不连接 MySQL。",
+        "云端 Java 使用 RDS 内网地址，ECS 与 RDS 选择同地域同 VPC，并配置访问白名单。",
+        "DB_URL、DB_USERNAME、DB_PASSWORD 只交给后端；MySQL 保存业务记录及文件元数据。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "后续扩展位置",
+      "items": [
+        "OSS：接入授权的图片、音频后再增加；图中只显示后端存取关系。",
+        "Redis：有缓存或共享状态需求时增加；当前未接入。",
+        "检索与向量索引：可信资料和 RAG 需求形成后再选型。",
+        "耗时任务：资料整理和 Agent 执行需要持久化状态，再考虑独立 Worker 与队列。"
+      ]
+    },
+    {
+      "dot": "amber",
+      "title": "运行与上线配置",
+      "items": [
+        "域名解析到入口地址，HTTPS 证书由入口使用；具体域名与上线配置尚未完成。",
+        "后台写入需要认证、权限和审核流程；现有读取接口尚未实现这些能力。",
+        "监控覆盖应用错误、数据库连接和磁盘等；备份需要设置保留与恢复验证。",
+        "云端连接、HTTPS、Nginx 和 OSS 均为方案，不能视为已完成的部署。"
+      ]
+    }
+  ]
+}

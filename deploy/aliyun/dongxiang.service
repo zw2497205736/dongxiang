@@ -1,0 +1,22 @@
+[Unit]
+Description=Dongxiang Culture Java Backend
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=dongxiang
+Group=dongxiang
+WorkingDirectory=/opt/dongxiang/backend
+Environment=SPRING_PROFILES_ACTIVE=cloud
+EnvironmentFile=/etc/dongxiang/backend.env
+ExecStart=/usr/bin/java -Xms128m -Xmx512m -jar /opt/dongxiang/backend/culture-platform.jar
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+NoNewPrivileges=true
+PrivateTmp=true
+SyslogIdentifier=dongxiang-backend
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,51 @@
+# 放在 Nginx 的 http 配置上下文中，例如 /etc/nginx/conf.d/dongxiang.conf。
+# 部署前替换域名、证书文件路径，准备好 frontend 目录后执行 nginx -t。
+server {
+    listen 80;
+    server_name culture.example.com;
+    return 301 https://culture.example.com$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name culture.example.com;
+
+    ssl_certificate /etc/ssl/dongxiang/fullchain.pem;
+    ssl_certificate_key /etc/ssl/dongxiang/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+
+    root /opt/dongxiang/frontend;
+    index index.html;
+
+    location = /api {
+        return 404;
+    }
+
+    location /api/ {
+        # 没有尾部 /，保留 /api/articles 等原始路径。
+        proxy_pass http://127.0.0.1:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Forwarded "";
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port $server_port;
+        proxy_connect_timeout 5s;
+        proxy_read_timeout 30s;
+    }
+
+    location /assets/ {
+        try_files $uri =404;
+    }
+
+    location = /index.html {
+        add_header Cache-Control "no-cache";
+    }
+
+    location / {
+        # 文章详情地址也返回 React 入口，再由前端选择页面。
+        try_files $uri $uri/ /index.html;
+    }
+}
